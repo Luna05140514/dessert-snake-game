@@ -199,16 +199,6 @@ export default function App() {
         y: (head.y + direction.y + GRID_SIZE) % GRID_SIZE,
       };
 
-      // Check collision with self
-      if (prevSnake.some(segment => segment.x === newHead.x && segment.y === newHead.y)) {
-        setIsGameOver(true);
-        if (score > highScore) {
-          setHighScore(score);
-          localStorage.setItem('snakeHighScore', score.toString());
-        }
-        return prevSnake;
-      }
-
       const newSnake = [newHead, ...prevSnake];
 
       // Check collision with any food
@@ -352,8 +342,8 @@ export default function App() {
   }, [snake, foods]);
 
   return (
-    <div className="min-h-screen bg-pink-50 flex flex-col items-center justify-center p-4 font-sans text-slate-800">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-pink-200">
+    <div className="min-h-screen bg-pink-50 flex flex-col items-center justify-center p-0 sm:p-4 font-sans text-slate-800">
+      <div className="w-full h-screen sm:h-auto sm:max-w-2xl bg-white sm:rounded-3xl shadow-xl overflow-hidden sm:border-4 border-pink-200 flex flex-col">
         {/* Header */}
         <div className="p-6 bg-pink-100 flex justify-between items-center border-b-4 border-pink-200">
           <div>
@@ -391,54 +381,56 @@ export default function App() {
         </div>
 
         {/* Game Area */}
-        <div 
-          ref={gameContainerRef}
-          className="relative aspect-square p-4 bg-white touch-none select-none"
-        >
-          <canvas
-            ref={canvasRef}
-            width={400}
-            height={400}
-            className="w-full h-full rounded-xl bg-slate-50 border-2 border-pink-100 touch-none"
-          />
+        <div className="flex-grow relative flex items-center justify-center bg-white p-2 sm:p-4 overflow-hidden">
+          <div 
+            ref={gameContainerRef}
+            className="relative w-full max-w-full aspect-square touch-none select-none"
+          >
+            <canvas
+              ref={canvasRef}
+              width={400}
+              height={400}
+              className="w-full h-full rounded-xl bg-slate-50 border-2 border-pink-100 touch-none shadow-inner"
+            />
 
-          {/* Overlays */}
-          <AnimatePresence>
-            {isGameOver && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-10"
-              >
-                <h2 className="text-4xl font-black text-pink-600 mb-2">遊戲結束!</h2>
-                <p className="text-xl font-bold text-slate-600 mb-6">得分: {score}</p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    resetGame();
-                  }}
-                  className="w-40 h-12 flex items-center justify-center bg-pink-50 rounded-xl shadow-md border-2 border-pink-200 text-pink-600 hover:bg-pink-100 transition-all active:scale-95 cursor-pointer touch-manipulation z-20 font-bold gap-2"
-                  title="重新開始"
+            {/* Overlays */}
+            <AnimatePresence>
+              {isGameOver && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm z-10 rounded-xl"
                 >
-                  <RotateCcw size={20} /> 再玩一次
-                </button>
-              </motion.div>
-            )}
+                  <h2 className="text-4xl font-black text-pink-600 mb-2">遊戲結束!</h2>
+                  <p className="text-xl font-bold text-slate-600 mb-6">得分: {score}</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetGame();
+                    }}
+                    className="w-40 h-12 flex items-center justify-center bg-pink-50 rounded-xl shadow-md border-2 border-pink-200 text-pink-600 hover:bg-pink-100 transition-all active:scale-95 cursor-pointer touch-manipulation z-20 font-bold gap-2"
+                    title="重新開始"
+                  >
+                    <RotateCcw size={20} /> 再玩一次
+                  </button>
+                </motion.div>
+              )}
 
-            {isPaused && !isGameOver && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 flex items-center justify-center bg-pink-50/40 backdrop-blur-[2px] z-10"
-              >
-                <div className="bg-white p-6 rounded-full shadow-2xl border-4 border-pink-200">
-                  <Play size={48} className="text-pink-500 fill-pink-500" />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {isPaused && !isGameOver && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex items-center justify-center bg-pink-50/40 backdrop-blur-[2px] z-10 rounded-xl"
+                >
+                  <div className="bg-white p-6 rounded-full shadow-2xl border-4 border-pink-200">
+                    <Play size={48} className="text-pink-500 fill-pink-500" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
 
         {/* Controls Info */}
