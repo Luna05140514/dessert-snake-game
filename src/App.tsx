@@ -403,9 +403,10 @@ export default function App() {
                 <p className="text-xl font-bold text-slate-600 mb-6">得分: {score}</p>
                 <button
                   onClick={resetGame}
-                  className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all active:scale-95 flex items-center gap-2 touch-manipulation"
+                  className="w-100 h-12 flex items-center justify-center bg-pink rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-100 transition-colors"
+              title="重新開始"
                 >
-                  <RotateCcw size={20} /> 結束
+                  <RotateCcw size={20} /> 再玩一次
                 </button>
               </motion.div>
             )}
