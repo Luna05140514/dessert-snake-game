@@ -49,11 +49,41 @@ export default function App() {
     const container = gameContainerRef.current;
     if (!container) return;
 
+    const handleCanvasInteraction = (clientX: number, clientY: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas || isPaused || isGameOver) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      // Convert to grid coordinates
+      const gridX = Math.floor((x / rect.width) * GRID_SIZE);
+      const gridY = Math.floor((y / rect.height) * GRID_SIZE);
+
+      const head = snake[0];
+      const diffX = gridX - head.x;
+      const diffY = gridY - head.y;
+
+      // Decide direction based on which axis has more distance
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0 && directionRef.current.x === 0) setDirection({ x: 1, y: 0 });
+        else if (diffX < 0 && directionRef.current.x === 0) setDirection({ x: -1, y: 0 });
+        else if (diffY > 0 && directionRef.current.y === 0) setDirection({ x: 0, y: 1 });
+        else if (diffY < 0 && directionRef.current.y === 0) setDirection({ x: 0, y: -1 });
+      } else {
+        if (diffY > 0 && directionRef.current.y === 0) setDirection({ x: 0, y: 1 });
+        else if (diffY < 0 && directionRef.current.y === 0) setDirection({ x: 0, y: -1 });
+        else if (diffX > 0 && directionRef.current.x === 0) setDirection({ x: 1, y: 0 });
+        else if (diffX < 0 && directionRef.current.x === 0) setDirection({ x: -1, y: 0 });
+      }
+    };
+
     const handleNativeTouchStart = (e: TouchEvent) => {
-      // Prevent scrolling while playing
       if (e.cancelable) e.preventDefault();
       const touch = e.touches[0];
       touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+      handleCanvasInteraction(touch.clientX, touch.clientY);
     };
 
     const handleNativeTouchMove = (e: TouchEvent) => {
@@ -66,15 +96,13 @@ export default function App() {
       const touch = e.changedTouches[0];
       const deltaX = touch.clientX - touchStartRef.current.x;
       const deltaY = touch.clientY - touchStartRef.current.y;
-      const minSwipeDistance = 20;
+      const minSwipeDistance = 30;
 
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (Math.abs(deltaX) > minSwipeDistance) {
+      if (Math.abs(deltaX) > minSwipeDistance || Math.abs(deltaY) > minSwipeDistance) {
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
           if (deltaX > 0 && directionRef.current.x === 0) setDirection({ x: 1, y: 0 });
           else if (deltaX < 0 && directionRef.current.x === 0) setDirection({ x: -1, y: 0 });
-        }
-      } else {
-        if (Math.abs(deltaY) > minSwipeDistance) {
+        } else {
           if (deltaY > 0 && directionRef.current.y === 0) setDirection({ x: 0, y: 1 });
           else if (deltaY < 0 && directionRef.current.y === 0) setDirection({ x: 0, y: -1 });
         }
@@ -82,16 +110,24 @@ export default function App() {
       touchStartRef.current = null;
     };
 
+    const handlePointerDown = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') {
+        handleCanvasInteraction(e.clientX, e.clientY);
+      }
+    };
+
     container.addEventListener('touchstart', handleNativeTouchStart, { passive: false });
     container.addEventListener('touchmove', handleNativeTouchMove, { passive: false });
     container.addEventListener('touchend', handleNativeTouchEnd, { passive: false });
+    container.addEventListener('pointerdown', handlePointerDown);
 
     return () => {
       container.removeEventListener('touchstart', handleNativeTouchStart);
       container.removeEventListener('touchmove', handleNativeTouchMove);
       container.removeEventListener('touchend', handleNativeTouchEnd);
+      container.removeEventListener('pointerdown', handlePointerDown);
     };
-  }, []);
+  }, [isPaused, isGameOver, snake]);
 
   const generateFood = useCallback((currentSnake: Point[], currentFoods: Food[] = []): Food => {
     let newFood: Point;
@@ -385,7 +421,7 @@ export default function App() {
           </div>
 
           <div className="text-xs text-pink-400 font-bold uppercase tracking-widest text-right">
-            滑動螢幕或使用方向鍵<br />空白鍵暫停
+            點擊畫面或滑動控制方向<br />空白鍵暫停
           </div>
         </div>
       </div>
