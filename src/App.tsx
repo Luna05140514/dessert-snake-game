@@ -17,7 +17,7 @@ const INITIAL_SPEED = 150;
 
 const DESSERTS: DessertType[] = ['cookie', 'cake', 'candy'];
 const DESSERT_EMOJIS: Record<DessertType, string> = {
-  cookie: '🍪',
+  cookie: '🧇',
   cake: '🍰',
   candy: '🍬',
 };
@@ -147,6 +147,12 @@ export default function App() {
   }, []);
 
   const resetGame = () => {
+    // Reset timer to prevent immediate jump
+    lastUpdateTimeRef.current = 0;
+    
+    // Reset direction ref immediately for touch logic
+    directionRef.current = INITIAL_DIRECTION;
+    
     setSnake(INITIAL_SNAKE);
     setDirection(INITIAL_DIRECTION);
     setScore(0);
@@ -280,7 +286,7 @@ export default function App() {
     }
 
     // Draw foods
-    ctx.font = `${cellSize * 1.1}px Arial`;
+    ctx.font = `${cellSize * 1.5}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     foods.forEach(food => {
@@ -344,6 +350,25 @@ export default function App() {
             </h1>
             <p className="text-sm text-pink-400 font-medium">快去吃甜點吧！</p>
           </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setIsPaused(!isPaused)}
+              disabled={isGameOver}
+              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-50 transition-colors disabled:opacity-50"
+              title={isPaused ? "繼續" : "暫停"}
+            >
+              {isPaused ? <Play size={24} fill="currentColor" /> : <Pause size={24} fill="currentColor" />}
+            </button>
+            <button
+              onClick={resetGame}
+              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-50 transition-colors"
+              title="重新開始"
+            >
+              <RotateCcw size={24} />
+            </button>
+          </div>
+
           <div className="text-right">
             <div className="flex items-center gap-2 justify-end text-pink-600 font-bold">
               <Trophy size={18} />
@@ -378,7 +403,8 @@ export default function App() {
                 <p className="text-xl font-bold text-slate-600 mb-6">得分: {score}</p>
                 <button
                   onClick={resetGame}
-                  className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                  className="w-40 h-12 flex items-center justify-center bg-pink-50 rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-100 transition-colors"
+              title="重新開始"
                 >
                   <RotateCcw size={20} /> 再玩一次
                 </button>
@@ -400,28 +426,10 @@ export default function App() {
           </AnimatePresence>
         </div>
 
-        {/* Controls */}
-        <div className="p-6 bg-pink-50 flex justify-between items-center border-t-4 border-pink-200">
-          <div className="flex gap-3">
-            <button
-              onClick={() => setIsPaused(!isPaused)}
-              disabled={isGameOver}
-              className="w-14 h-14 flex items-center justify-center bg-white rounded-2xl shadow-md border-2 border-pink-200 text-pink-500 hover:bg-pink-100 transition-colors disabled:opacity-50"
-              title={isPaused ? "繼續" : "暫停"}
-            >
-              {isPaused ? <Play size={28} fill="currentColor" /> : <Pause size={28} fill="currentColor" />}
-            </button>
-            <button
-              onClick={resetGame}
-              className="w-14 h-14 flex items-center justify-center bg-white rounded-2xl shadow-md border-2 border-pink-200 text-pink-500 hover:bg-pink-100 transition-colors"
-              title="重新開始"
-            >
-              <RotateCcw size={28} />
-            </button>
-          </div>
-
-          <div className="text-xs text-pink-400 font-bold uppercase tracking-widest text-right">
-            點擊畫面或滑動控制方向<br />空白鍵暫停
+        {/* Controls Info */}
+        <div className="p-4 bg-pink-50 flex justify-center items-center border-t-4 border-pink-200">
+          <div className="text-xs text-pink-400 font-bold uppercase tracking-widest text-center">
+            點擊畫面或滑動控制方向 | 空白鍵暫停
           </div>
         </div>
       </div>
