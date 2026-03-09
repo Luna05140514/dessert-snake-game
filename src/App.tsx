@@ -405,7 +405,7 @@ export default function App() {
                   onClick={resetGame}
                   className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all active:scale-95 flex items-center gap-2 touch-manipulation"
                 >
-                  <RotateCcw size={20} /> 再玩一次
+                  <RotateCcw size={20} /> 結束
                 </button>
               </motion.div>
             )}
