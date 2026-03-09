@@ -80,6 +80,11 @@ export default function App() {
     };
 
     const handleNativeTouchStart = (e: TouchEvent) => {
+      // Don't prevent default if touching a button or interactive element
+      if ((e.target as HTMLElement).closest('button')) {
+        return;
+      }
+      
       if (e.cancelable) e.preventDefault();
       const touch = e.touches[0];
       touchStartRef.current = { x: touch.clientX, y: touch.clientY };
@@ -87,10 +92,16 @@ export default function App() {
     };
 
     const handleNativeTouchMove = (e: TouchEvent) => {
+      if ((e.target as HTMLElement).closest('button')) {
+        return;
+      }
       if (e.cancelable) e.preventDefault();
     };
 
     const handleNativeTouchEnd = (e: TouchEvent) => {
+      if ((e.target as HTMLElement).closest('button')) {
+        return;
+      }
       if (!touchStartRef.current) return;
 
       const touch = e.changedTouches[0];
@@ -147,6 +158,7 @@ export default function App() {
   }, []);
 
   const resetGame = () => {
+    console.log('Resetting game...');
     // Reset timer to prevent immediate jump
     lastUpdateTimeRef.current = 0;
     
@@ -402,9 +414,12 @@ export default function App() {
                 <h2 className="text-4xl font-black text-pink-600 mb-2">遊戲結束!</h2>
                 <p className="text-xl font-bold text-slate-600 mb-6">得分: {score}</p>
                 <button
-                  onClick={resetGame}
-                  className="w-40 h-12 flex items-center justify-center bg-pink-50 rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-100 transition-colors"
-              title="重新開始"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    resetGame();
+                  }}
+                  className="w-40 h-12 flex items-center justify-center bg-pink-50 rounded-xl shadow-md border-2 border-pink-200 text-pink-600 hover:bg-pink-100 transition-all active:scale-95 cursor-pointer touch-manipulation z-20 font-bold gap-2"
+                  title="重新開始"
                 >
                   <RotateCcw size={20} /> 再玩一次
                 </button>
