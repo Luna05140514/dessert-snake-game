@@ -147,6 +147,12 @@ export default function App() {
   }, []);
 
   const resetGame = () => {
+    // Reset timer to prevent immediate jump
+    lastUpdateTimeRef.current = 0;
+    
+    // Reset direction ref immediately for touch logic
+    directionRef.current = INITIAL_DIRECTION;
+    
     setSnake(INITIAL_SNAKE);
     setDirection(INITIAL_DIRECTION);
     setScore(0);
@@ -397,7 +403,7 @@ export default function App() {
                 <p className="text-xl font-bold text-slate-600 mb-6">得分: {score}</p>
                 <button
                   onClick={resetGame}
-                  className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all active:scale-95 flex items-center gap-2"
+                  className="bg-pink-500 hover:bg-pink-600 text-white px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all active:scale-95 flex items-center gap-2 touch-manipulation"
                 >
                   <RotateCcw size={20} /> 再玩一次
                 </button>
