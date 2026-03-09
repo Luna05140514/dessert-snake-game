@@ -25,7 +25,7 @@ const DESSERT_EMOJIS: Record<DessertType, string> = {
 export default function App() {
   const [snake, setSnake] = useState<Point[]>(INITIAL_SNAKE);
   const [direction, setDirection] = useState<Point>(INITIAL_DIRECTION);
-  const [food, setFood] = useState<Food | null>(null);
+  const [foods, setFoods] = useState<Food[]>([]);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -93,14 +93,16 @@ export default function App() {
     };
   }, []);
 
-  const generateFood = useCallback((currentSnake: Point[]): Food => {
+  const generateFood = useCallback((currentSnake: Point[], currentFoods: Food[] = []): Food => {
     let newFood: Point;
     while (true) {
       newFood = {
         x: Math.floor(Math.random() * GRID_SIZE),
         y: Math.floor(Math.random() * GRID_SIZE),
       };
-      if (!currentSnake.some(segment => segment.x === newFood.x && segment.y === newFood.y)) {
+      const onSnake = currentSnake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
+      const onFood = currentFoods.some(f => f.x === newFood.x && f.y === newFood.y);
+      if (!onSnake && !onFood) {
         break;
       }
     }
@@ -115,11 +117,20 @@ export default function App() {
     setIsPaused(false);
     setIsGameOver(false);
     setSpeed(INITIAL_SPEED);
-    setFood(generateFood(INITIAL_SNAKE));
+    
+    const initialFoods: Food[] = [];
+    for (let i = 0; i < 10; i++) {
+      initialFoods.push(generateFood(INITIAL_SNAKE, initialFoods));
+    }
+    setFoods(initialFoods);
   };
 
   useEffect(() => {
-    setFood(generateFood(INITIAL_SNAKE));
+    const initialFoods: Food[] = [];
+    for (let i = 0; i < 10; i++) {
+      initialFoods.push(generateFood(INITIAL_SNAKE, initialFoods));
+    }
+    setFoods(initialFoods);
     const savedHighScore = localStorage.getItem('snakeHighScore');
     if (savedHighScore) setHighScore(parseInt(savedHighScore));
   }, [generateFood]);
@@ -146,10 +157,14 @@ export default function App() {
 
       const newSnake = [newHead, ...prevSnake];
 
-      // Check collision with food
-      if (food && newHead.x === food.x && newHead.y === food.y) {
+      // Check collision with any food
+      const foodIndex = foods.findIndex(f => f.x === newHead.x && f.y === newHead.y);
+      if (foodIndex !== -1) {
         setScore(s => s + 10);
-        setFood(generateFood(newSnake));
+        const newFoods = [...foods];
+        newFoods.splice(foodIndex, 1);
+        newFoods.push(generateFood(newSnake, newFoods));
+        setFoods(newFoods);
         setSpeed(prev => Math.max(prev - 2, 80)); // Increase speed
       } else {
         newSnake.pop();
@@ -157,7 +172,7 @@ export default function App() {
 
       return newSnake;
     });
-  }, [direction, food, generateFood, isGameOver, isPaused, score, highScore]);
+  }, [direction, foods, generateFood, isGameOver, isPaused, score, highScore]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -228,17 +243,17 @@ export default function App() {
       ctx.stroke();
     }
 
-    // Draw food
-    if (food) {
-      ctx.font = `${cellSize * 0.8}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+    // Draw foods
+    ctx.font = `${cellSize * 1.1}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    foods.forEach(food => {
       ctx.fillText(
         DESSERT_EMOJIS[food.type],
         food.x * cellSize + cellSize / 2,
         food.y * cellSize + cellSize / 2
       );
-    }
+    });
 
     // Draw snake
     snake.forEach((segment, index) => {
@@ -280,7 +295,7 @@ export default function App() {
         ctx.fill();
       }
     });
-  }, [snake, food]);
+  }, [snake, foods]);
 
   return (
     <div className="min-h-screen bg-pink-50 flex flex-col items-center justify-center p-4 font-sans text-slate-800">
