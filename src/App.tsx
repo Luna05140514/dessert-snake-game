@@ -345,7 +345,7 @@ export default function App() {
     <div className="min-h-screen bg-pink-50 flex flex-col items-center justify-center p-0 sm:p-4 font-sans text-slate-800">
       <div className="w-full h-screen sm:h-auto sm:max-w-2xl bg-white sm:rounded-3xl shadow-xl overflow-hidden sm:border-4 border-pink-200 flex flex-col">
         {/* Header */}
-        <div className="p-6 bg-pink-100 flex justify-between items-center border-b-4 border-pink-200">
+        <div className="p-6 bg-pink-100 flex justify-between items-center border-b-4 border-pink-200 relative z-30">
           <div>
             <h1 className="text-2xl font-bold text-pink-600 flex items-center gap-2">
               甜點貪食蛇 🐍
@@ -355,16 +355,22 @@ export default function App() {
 
           <div className="flex gap-2">
             <button
-              onClick={() => setIsPaused(!isPaused)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsPaused(!isPaused);
+              }}
               disabled={isGameOver}
-              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-50 transition-colors disabled:opacity-50"
+              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-50 transition-colors disabled:opacity-50 cursor-pointer touch-manipulation active:scale-95"
               title={isPaused ? "繼續" : "暫停"}
             >
               {isPaused ? <Play size={24} fill="currentColor" /> : <Pause size={24} fill="currentColor" />}
             </button>
             <button
-              onClick={resetGame}
-              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-50 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetGame();
+              }}
+              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm border-2 border-pink-200 text-pink-500 hover:bg-pink-50 transition-colors cursor-pointer touch-manipulation active:scale-95"
               title="重新開始"
             >
               <RotateCcw size={24} />
@@ -422,9 +428,10 @@ export default function App() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex items-center justify-center bg-pink-50/40 backdrop-blur-[2px] z-10 rounded-xl"
+                  onClick={() => setIsPaused(false)}
+                  className="absolute inset-0 flex items-center justify-center bg-pink-50/40 backdrop-blur-[2px] z-10 rounded-xl cursor-pointer touch-manipulation"
                 >
-                  <div className="bg-white p-6 rounded-full shadow-2xl border-4 border-pink-200">
+                  <div className="bg-white p-6 rounded-full shadow-2xl border-4 border-pink-200 pointer-events-none">
                     <Play size={48} className="text-pink-500 fill-pink-500" />
                   </div>
                 </motion.div>
